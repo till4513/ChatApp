@@ -23,7 +23,7 @@ def home():
         join = request.form.get('join', False)
 
         if not name:
-            return render_template('home.html', error="Name is required", code=code)
+            return render_template('home.html', error="Name is required", code=code, available_rooms=available_rooms)
 
         if create != False:
             room_code = generate_room_code(6, list(rooms.keys()))
@@ -33,21 +33,36 @@ def home():
             }
             rooms[room_code] = new_room
 
-        if join != False:
+        button_value = request.form.get('join', '').split('Join Room ')
+        print(button_value)
+        print('here ----------------')
+        if button_value:
+            room_code = button_value[0]
+            print(room_code)
+
+        if not name:
+            return render_template('home.html', error="Name is required", code=code, available_rooms=available_rooms)
+        if join != False and not button_value:
             # no code
             if not code:
-                return render_template('home.html', error="Please enter a room code to enter a chat room", name=name)
+                    return render_template('home.html', error="Name is required", name=name, available_rooms=available_rooms)
+
             # invalid code
             if code not in rooms:
-                return render_template('home.html', error="Room code invalid", name=name)
+                return render_template('home.html', error="Name is required", name=name, available_rooms=available_rooms)
+
 
             room_code = code
+
+
 
         session['room'] = room_code
         session['name'] = name
         return redirect(url_for('room'))
     else:
-        return render_template('home.html')
+        available_rooms = list(rooms.keys())
+
+        return render_template('home.html', available_rooms=available_rooms)
 
 
 @app.route('/room')
